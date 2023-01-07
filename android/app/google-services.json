@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "819917758683",
+    "project_id": "fir-momo-app",
+    "storage_bucket": "fir-momo-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819917758683:android:1d5c232e0904c2ddc1acfe",
+        "android_client_info": {
+          "package_name": "com.example.flutter_20230103_memo_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819917758683-pclna61bgc6ud62gud0a591hassi8de3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfmxPyuw2VZk1v6lm7sY6W5qPBzkBehQ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819917758683-pclna61bgc6ud62gud0a591hassi8de3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
