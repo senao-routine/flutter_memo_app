@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_20230103_memo_app/pages/add_memo_page.dart';
 import 'package:flutter_20230103_memo_app/pages/memo_detail_page.dart';
 
 import '../model/memo.dart';
@@ -12,28 +13,7 @@ class TopPage extends StatefulWidget {
 }
 
 class _TopPageState extends State<TopPage> {
-  List<Memo> memoList = [];
-
-  Future<void> fetchMemo() async {
-    final memoCollection =
-        await FirebaseFirestore.instance.collection('memo').get();
-    final docs = memoCollection.docs;
-    for (var doc in docs) {
-      Memo fetchMemo = Memo(
-        title: doc.data()['title'],
-        detail: doc.data()['detail'],
-        createdDate: doc.data()['createdDate'],
-      );
-      memoList.add(fetchMemo);
-    }
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchMemo();
-  }
+  final memoCollection = FirebaseFirestore.instance.collection('memo');
 
   @override
   Widget build(BuildContext context) {
@@ -41,22 +21,67 @@ class _TopPageState extends State<TopPage> {
       appBar: AppBar(
         title: const Text('Flutter_Firebase'),
       ),
-      body: ListView.builder(
-          itemCount: memoList.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(memoList[index].title),
-              onTap: () {
-                //確認画面に遷移する記述
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MemoDetailPage(memoList[index])));
-              },
-            );
+      body: StreamBuilder<QuerySnapshot>(
+          stream: memoCollection.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+            if (!snapshot.hasData) {
+              return Center(child: Text('データがありません'));
+            }
+
+            final docs = snapshot.data!.docs;
+
+            return ListView.builder(
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  Map<String, dynamic> data =
+                      docs[index].data() as Map<String, dynamic>;
+
+                  final Memo fetchMemo = Memo(
+                    title: data['title'],
+                    detail: data['detail'],
+                    createdDate: data['createdDate'],
+                    updatedDate: data['updatedDate'],
+                  );
+
+                  return ListTile(
+                    title: Text(fetchMemo.title),
+                    trailing: IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    title: const Text('編集'),
+                                  ),
+                                  ListTile(
+                                    title: const Text('削除'),
+                                  ),
+                                ],
+                              );
+                            });
+                      },
+                      icon: const Icon(Icons.edit),
+                    ),
+                    onTap: () {
+                      //確認画面に遷移する記述
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MemoDetailPage(fetchMemo)));
+                    },
+                  );
+                });
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const AddMemoPage()));
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
