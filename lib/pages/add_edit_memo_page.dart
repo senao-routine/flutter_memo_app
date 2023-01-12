@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_20230103_memo_app/model/memo.dart';
 
-class AddMemoPage extends StatefulWidget {
-  const AddMemoPage({super.key});
+class AddEditMemoPage extends StatefulWidget {
+  final Memo? currentMemo;
+  const AddEditMemoPage({Key? key, this.currentMemo}) : super(key: key);
 
   @override
-  State<AddMemoPage> createState() => _AddMemoPageState();
+  State<AddEditMemoPage> createState() => _AddMemoPageState();
 }
 
-class _AddMemoPageState extends State<AddMemoPage> {
+class _AddMemoPageState extends State<AddEditMemoPage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController detailController = TextEditingController();
 
@@ -21,11 +23,31 @@ class _AddMemoPageState extends State<AddMemoPage> {
     });
   }
 
+  Future<void> updateMemo() async {
+    final doc = FirebaseFirestore.instance
+        .collection('memo')
+        .doc(widget.currentMemo!.id);
+    await doc.update({
+      't itle': titleController.text,
+      'detail': detailController.text,
+      'updatedDate': Timestamp.now(),
+    });
+  }
+
+  @override
+  void initState() {
+    if (widget.currentMemo != null) {
+      titleController.text = widget.currentMemo!.title;
+      detailController.text = widget.currentMemo!.detail;
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('メモ追加'),
+        title: Text(widget.currentMemo == null ? 'メモ追加' : 'メモ編集'),
       ),
       body: Center(
         child: Column(
@@ -64,10 +86,14 @@ class _AddMemoPageState extends State<AddMemoPage> {
                 child: ElevatedButton(
                     onPressed: () async {
                       //メモを作成する処理を記述
-                      await createMemo();
+                      if (widget.currentMemo == null) {
+                        await createMemo();
+                      } else {
+                        await updateMemo();
+                      }
                       Navigator.pop(context);
                     },
-                    child: const Text('追加')))
+                    child: Text(widget.currentMemo == null ? '追加' : '更新')))
           ],
         ),
       ),
